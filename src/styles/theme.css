@@ -68,6 +68,7 @@ select {
   flex-direction: column;
   box-shadow: var(--shadow);
   overflow: hidden;
+  transform: translateZ(0);
 }
 
 .phone-body {
@@ -315,6 +316,7 @@ select {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  margin-bottom: 16px;
 }
 
 .stat {
@@ -394,12 +396,13 @@ select {
 
 /* ===== Slide-up modal ===== */
 .modal-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
-  z-index: 60;
+  z-index: 9999;
   display: flex;
   align-items: flex-end;
+  padding-bottom: calc(78px + env(safe-area-inset-bottom));
   animation: fade 0.2s ease;
 }
 
@@ -689,7 +692,7 @@ select {
   border: 1px solid #1f5040;
   border-radius: 20px;
   padding: 20px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .beforeafter {

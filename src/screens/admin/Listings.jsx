@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Plus, Sparkles, MapPin } from 'lucide-react'
+import { Plus, MapPin } from 'lucide-react'
 import Header from '../../components/Header.jsx'
 import PhotoUpload from '../../components/PhotoUpload.jsx'
 import { useApp } from '../../context/AppContext.jsx'
-import { estimateHours } from '../../utils/estimateHours.js'
 import { SEVERITY } from '../../data/mockData.js'
 
 const PLACEHOLDER =
@@ -21,16 +20,16 @@ export default function Listings() {
     startTime: '09:00',
     endTime: '12:00',
     capacity: 15,
+    estimatedHours: 2,
     photoURL: null
   })
 
-  const aiHours = estimateHours(form.severity, Number(form.sizeAcres))
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
   const publish = () => {
     addListing({
       ...form,
-      estimatedHours: aiHours,
+      estimatedHours: Number(form.estimatedHours),
       capacity: Number(form.capacity),
       photoURL: form.photoURL || PLACEHOLDER
     })
@@ -96,20 +95,15 @@ export default function Listings() {
               </div>
             </div>
 
-            <div
-              className="row between"
-              style={{
-                background: 'var(--surface-2)',
-                padding: '12px 14px',
-                borderRadius: 12,
-                margin: '4px 0 12px'
-              }}
-            >
-              <span className="row" style={{ gap: 8 }}>
-                <Sparkles size={16} color="#e0b341" />
-                AI estimated hours
-              </span>
-              <strong>{aiHours} hrs</strong>
+            <div className="field">
+              <label>Estimated Hours</label>
+              <input
+                type="number"
+                step="0.5"
+                min="0.5"
+                value={form.estimatedHours}
+                onChange={(e) => set('estimatedHours', e.target.value)}
+              />
             </div>
 
             <div className="field">
@@ -149,6 +143,7 @@ export default function Listings() {
 
             <button
               className="btn primary"
+              style={{ marginTop: 16 }}
               disabled={!form.title || !form.address}
               onClick={publish}
             >

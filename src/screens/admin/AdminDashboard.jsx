@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const completed = signups.filter((s) => s.status === 'completed').length
   const hoursLogged = signups
     .filter((s) => s.status === 'completed')
-    .reduce((a, s) => a + (s.hoursAwarded || 0), 0)
+    .reduce((a, s) => a + (s.actualHours || 0), 0)
 
   return (
     <>
@@ -18,7 +18,7 @@ export default function AdminDashboard() {
         <div className="hero">
           <div className="muted" style={{ fontSize: 13 }}>Community impact this season</div>
           <div style={{ fontSize: 34, fontWeight: 800, margin: '4px 0' }}>
-            {hoursLogged + 142}h
+            {Number(hoursLogged.toFixed(1))}h
           </div>
           <div className="muted" style={{ fontSize: 13 }}>
             volunteer hours logged across {listings.length} active hot spots

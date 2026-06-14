@@ -6,10 +6,8 @@ import { rankFor, nextRank } from '../data/mockData.js'
 export default function CompletionSummary({ signup, user, onClose }) {
   if (!signup) return null
 
-  const hours = signup.estimatedHours
+  const hours = signup.actualHours || signup.estimatedHours
   const points = Math.round(hours * 50)
-  // Rough impact estimate: ~12 lbs of litter per volunteer-hour.
-  const lbs = Math.round(hours * 12)
 
   const projectedPoints = (user.points || 0) + points
   const rank = rankFor(projectedPoints)
@@ -46,12 +44,6 @@ export default function CompletionSummary({ signup, user, onClose }) {
         {/* Impact stats */}
         <div className="stat-grid" style={{ marginTop: 18 }}>
           <div className="stat">
-            <div className="num" style={{ color: 'var(--green)' }}>{lbs}</div>
-            <div className="lbl">
-              <Recycle size={12} style={{ verticalAlign: -1 }} /> lbs litter removed
-            </div>
-          </div>
-          <div className="stat">
             <div className="num">{hours}h</div>
             <div className="lbl">
               <Clock size={12} style={{ verticalAlign: -1 }} /> hours logged
@@ -61,12 +53,6 @@ export default function CompletionSummary({ signup, user, onClose }) {
             <div className="num" style={{ color: 'var(--gold)' }}>+{points}</div>
             <div className="lbl">
               <Sparkles size={12} style={{ verticalAlign: -1 }} /> points earned
-            </div>
-          </div>
-          <div className="stat">
-            <div className="num">{rank.emoji}</div>
-            <div className="lbl">
-              <Award size={12} style={{ verticalAlign: -1 }} /> {rank.name}
             </div>
           </div>
         </div>

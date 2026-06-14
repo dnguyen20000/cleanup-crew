@@ -42,7 +42,7 @@ export default function Verify() {
               </div>
             </div>
             <div className="muted" style={{ fontSize: 13, margin: '12px 0' }}>
-              Will award {s.estimatedHours}h + {Math.round(s.estimatedHours * 50)} pts on approval
+              Will award {s.actualHours || s.estimatedHours}h + {Math.round((s.actualHours || s.estimatedHours) * 50)} pts on approval
             </div>
             <button className="btn primary" onClick={() => approveCompletion(s.id)}>
               <CheckCircle2 size={18} /> Approve & award hours

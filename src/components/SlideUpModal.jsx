@@ -1,4 +1,4 @@
-import { MapPin, Clock, Calendar, Users, Shield, Sparkles } from 'lucide-react'
+import { MapPin, Clock, Calendar, Users, Shield } from 'lucide-react'
 import { SEVERITY } from '../data/mockData.js'
 import { useApp } from '../context/AppContext.jsx'
 
@@ -49,9 +49,6 @@ export default function SlideUpModal({ listing, onClose }) {
           <div>
             <span className="row" style={{ gap: 6 }}>
               Est. {listing.estimatedHours} hrs
-              <span className="pill gold" style={{ padding: '2px 8px' }}>
-                <Sparkles size={11} /> AI
-              </span>
             </span>
           </div>
         </div>

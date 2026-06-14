@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Clock, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import Header from '../../components/Header.jsx'
 import PhotoUpload from '../../components/PhotoUpload.jsx'
@@ -6,14 +6,9 @@ import CompletionSummary from '../../components/CompletionSummary.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 
 // Anti-cheat: check-in only allowed within the event's date/time window.
+// Temporarily bypassed for demo/testing purposes
 function withinWindow(s, now) {
-  try {
-    const start = new Date(`${s.eventDate}T${s.startTime}:00`)
-    const end = new Date(`${s.eventDate}T${s.endTime}:00`)
-    return now >= start && now <= end
-  } catch {
-    return false
-  }
+  return true
 }
 
 function buildWeek() {
@@ -32,12 +27,20 @@ function buildWeek() {
 const DOW = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
 export default function Calendar() {
-  const { signups, cancelSignup, setPhoto, submitForReview, user } = useApp()
+  const { signups, cancelSignup, checkIn, setPhoto, submitForReview, user } = useApp()
   const [openId, setOpenId] = useState(null)
   const [celebrate, setCelebrate] = useState(null)
   const now = new Date()
   const week = buildWeek()
   const datesWithEvents = new Set(signups.map((s) => s.eventDate))
+
+  const [nowMs, setNowMs] = useState(Date.now())
+  useEffect(() => {
+    if (openId) {
+      const interval = setInterval(() => setNowMs(Date.now()), 1000)
+      return () => clearInterval(interval)
+    }
+  }, [openId])
 
   return (
     <>
@@ -104,12 +107,26 @@ export default function Calendar() {
                     </div>
                   ) : (
                     <>
-                      {!open ? (
+                      {!s.checkedIn ? (
+                        <button className="btn primary" onClick={() => checkIn(s.id)}>
+                          Check in
+                        </button>
+                      ) : !open ? (
                         <button className="btn primary" onClick={() => setOpenId(s.id)}>
-                          Check in & log proof
+                          Log proof
                         </button>
                       ) : (
                         <div>
+                          {s.checkInTime && (
+                            <div className="card" style={{ marginBottom: 12, padding: '10px 14px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                              <div className="row between">
+                                <strong>Hours logged</strong>
+                                <span className="pill gold" style={{ fontSize: 14 }}>
+                                  {Math.max(0.1, Number(((nowMs - s.checkInTime) / 3600000).toFixed(1)))}h
+                                </span>
+                              </div>
+                            </div>
+                          )}
                           <div className="beforeafter" style={{ marginBottom: 12 }}>
                             <PhotoUpload
                               label="Before"
@@ -125,10 +142,15 @@ export default function Calendar() {
                           <button
                             className="btn primary"
                             disabled={!s.beforePhotoURL || !s.afterPhotoURL}
-                            onClick={() => {
-                              submitForReview(s.id)
-                              setOpenId(null)
-                              setCelebrate(s)
+                            onClick={async () => {
+                              try {
+                                const hours = s.checkInTime ? Math.max(0.1, Number(((Date.now() - s.checkInTime) / 3600000).toFixed(1))) : s.estimatedHours
+                                await submitForReview(s.id, hours)
+                                setOpenId(null)
+                                setCelebrate({ ...s, actualHours: hours })
+                              } catch (e) {
+                                alert("Submission failed: " + e.message)
+                              }
                             }}
                           >
                             <CheckCircle2 size={18} /> Submit for review

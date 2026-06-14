@@ -7,10 +7,13 @@ export default function SignIn() {
   const { signIn } = useApp()
   const navigate = useNavigate()
   const [tab, setTab] = useState('volunteer')
-  const [name, setName] = useState('Ryleigh J')
-  const [hometown, setHometown] = useState('Sandy Springs, GA')
+  const [isSignup, setIsSignup] = useState(true)
+  const [name, setName] = useState('')
+  const [hometown, setHometown] = useState('')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [gps, setGps] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const requestGps = () => {
     if (!navigator.geolocation) {
@@ -23,16 +26,23 @@ export default function SignIn() {
     )
   }
 
-  const submit = () => {
-    signIn(
+  const submit = async () => {
+    if (!email || !password) return
+    setLoading(true)
+    const success = await signIn(
       {
-        name: name || (tab === 'admin' ? 'Marcus T' : 'Volunteer'),
+        name: name || (tab === 'admin' ? 'Admin User' : 'Volunteer'),
         hometown,
-        email: email || `${(name || 'user').toLowerCase().replace(/\s+/g, '')}@cleanupcrew.app`
+        email,
+        password,
+        isSignup
       },
       tab
     )
-    navigate(tab === 'admin' ? '/admin/dashboard' : '/app/home')
+    setLoading(false)
+    if (success) {
+      navigate(tab === 'admin' ? '/admin/dashboard' : '/app/home')
+    }
   }
 
   return (
@@ -52,20 +62,34 @@ export default function SignIn() {
             </button>
           </div>
 
-          <div className="field">
-            <label>Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+          <div className="row" style={{ gap: 10, marginBottom: 12, justifyContent: 'center' }}>
+            <label style={{ fontSize: 13, cursor: 'pointer' }}>
+              <input type="radio" checked={isSignup} onChange={() => setIsSignup(true)} /> Sign Up
+            </label>
+            <label style={{ fontSize: 13, cursor: 'pointer' }}>
+              <input type="radio" checked={!isSignup} onChange={() => setIsSignup(false)} /> Log In
+            </label>
           </div>
-          {tab === 'volunteer' && (
-            <div className="field">
-              <label>Hometown</label>
-              <input
-                value={hometown}
-                onChange={(e) => setHometown(e.target.value)}
-                placeholder="City, State"
-              />
-            </div>
+
+          {isSignup && (
+            <>
+              <div className="field">
+                <label>Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+              </div>
+              {tab === 'volunteer' && (
+                <div className="field">
+                  <label>Hometown</label>
+                  <input
+                    value={hometown}
+                    onChange={(e) => setHometown(e.target.value)}
+                    placeholder="City, State"
+                  />
+                </div>
+              )}
+            </>
           )}
+
           <div className="field">
             <label>Email</label>
             <input
@@ -73,6 +97,16 @@ export default function SignIn() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
               type="email"
+            />
+          </div>
+
+          <div className="field">
+            <label>Password</label>
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              type="password"
             />
           </div>
 
@@ -85,13 +119,9 @@ export default function SignIn() {
             {gps ? 'Location enabled ✓' : 'Enable location services'}
           </button>
 
-          <button className="btn primary" style={{ marginTop: 8 }} onClick={submit}>
-            {tab === 'admin' ? 'Continue as Admin' : 'Get started'}
+          <button className="btn primary" style={{ marginTop: 8 }} onClick={submit} disabled={loading}>
+            {loading ? 'Processing...' : isSignup ? 'Create Account' : 'Log In'}
           </button>
-
-          <p className="faint" style={{ textAlign: 'center', fontSize: 12, marginTop: 8 }}>
-            Demo build · no real account needed
-          </p>
         </div>
       </div>
     </div>

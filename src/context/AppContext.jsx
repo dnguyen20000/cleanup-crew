@@ -1,136 +1,277 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { MOCK_USER, MOCK_LISTINGS } from '../data/mockData.js'
+import { auth, db, storage } from '../firebase.js'
+import { 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut as firebaseSignOut 
+} from 'firebase/auth'
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  onSnapshot, 
+  updateDoc, 
+  addDoc,
+  deleteDoc
+} from 'firebase/firestore'
+import { ref, uploadString, getDownloadURL } from 'firebase/storage'
 
 const AppContext = createContext(null)
 export const useApp = () => useContext(AppContext)
 
-const load = (key, fallback) => {
-  try {
-    const v = localStorage.getItem(key)
-    return v ? JSON.parse(v) : fallback
-  } catch {
-    return fallback
-  }
-}
-
 export function AppProvider({ children }) {
-  const [user, setUser] = useState(() => load('cc_user', null))
-  const [role, setRole] = useState(() => load('cc_role', 'volunteer'))
-  const [listings, setListings] = useState(() => load('cc_listings', MOCK_LISTINGS))
-  const [signups, setSignups] = useState(() => load('cc_signups', []))
+  const [user, setUser] = useState(null)
+  const [role, setRole] = useState('volunteer')
+  const [listings, setListings] = useState([])
+  const [signups, setSignups] = useState([])
   const [toast, setToast] = useState(null)
-
-  useEffect(() => localStorage.setItem('cc_user', JSON.stringify(user)), [user])
-  useEffect(() => localStorage.setItem('cc_role', JSON.stringify(role)), [role])
-  useEffect(() => localStorage.setItem('cc_listings', JSON.stringify(listings)), [listings])
-  useEffect(() => localStorage.setItem('cc_signups', JSON.stringify(signups)), [signups])
+  const [loading, setLoading] = useState(true)
 
   const showToast = (msg) => {
     setToast(msg)
     setTimeout(() => setToast(null), 2200)
   }
 
-  // --- Auth (mock) ---
-  const signIn = (profile, asRole) => {
-    const base = asRole === 'admin'
-      ? { ...MOCK_USER, role: 'admin', name: profile.name || 'Marcus T', points: 0 }
-      : { ...MOCK_USER, ...profile, role: 'volunteer' }
-    setUser({ ...base, ...profile, role: asRole })
-    setRole(asRole)
+  // --- Auth & User profile ---
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // Set initial user state with a default role to prevent infinite redirects
+        // Also provide defaults for name and stats so the UI doesn't crash on .split() or [0]
+        setUser({ 
+          uid: firebaseUser.uid, 
+          email: firebaseUser.email, 
+          role: 'volunteer',
+          name: 'Volunteer',
+          points: 0,
+          totalHours: 0,
+          cleanups: 0,
+          lbsCollected: 0,
+          hometown: 'Loading...'
+        })
+        setRole('volunteer')
+      } else {
+        setUser(null)
+        setRole('volunteer')
+      }
+      setLoading(false)
+    })
+    return () => unsub()
+  }, [])
+
+  // --- Real-time Listeners ---
+  useEffect(() => {
+    if (!user) return
+
+    // Listen to user profile
+    const unsubUser = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const profile = docSnap.data()
+        setUser(prev => ({ ...prev, ...profile }))
+        setRole(profile.role || 'volunteer')
+      }
+    })
+
+    const unsubListings = onSnapshot(collection(db, 'listings'), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setListings(data)
+    })
+
+    const unsubSignups = onSnapshot(collection(db, 'signups'), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setSignups(data)
+    })
+
+    return () => {
+      unsubUser()
+      unsubListings()
+      unsubSignups()
+    }
+  }, [user?.uid])
+
+  // --- Auth Actions ---
+  const signIn = async (profile, asRole) => {
+    try {
+      if (profile.isSignup) {
+        const cred = await createUserWithEmailAndPassword(auth, profile.email, profile.password)
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          name: profile.name || 'Volunteer',
+          email: profile.email,
+          role: asRole,
+          points: 0,
+          totalHours: 0,
+          cleanups: 0,
+          hometown: profile.hometown || 'Local Community',
+          team: 'Earth Defenders'
+        })
+      } else {
+        await signInWithEmailAndPassword(auth, profile.email, profile.password)
+      }
+      return true
+    } catch (err) {
+      console.error(err)
+      showToast(err.message.replace('Firebase: ', ''))
+      return false
+    }
   }
+
   const signOut = () => {
-    setUser(null)
+    firebaseSignOut(auth)
   }
 
   // --- Volunteer: sign up for an event ---
-  const signUpForEvent = (listing) => {
-    if (signups.some((s) => s.listingId === listing.id)) {
+  const signUpForEvent = async (listing) => {
+    if (signups.some((s) => s.listingId === listing.id && s.uid === user.uid)) {
       showToast('Already signed up')
       return
     }
-    const su = {
-      id: 's' + Date.now(),
-      listingId: listing.id,
-      uid: user.uid,
-      title: listing.title,
-      eventDate: listing.eventDate,
-      startTime: listing.startTime,
-      endTime: listing.endTime,
-      estimatedHours: listing.estimatedHours,
-      status: 'registered',
-      beforePhotoURL: null,
-      afterPhotoURL: null
+    try {
+      await addDoc(collection(db, 'signups'), {
+        listingId: listing.id,
+        uid: user.uid,
+        title: listing.title,
+        eventDate: listing.eventDate,
+        startTime: listing.startTime,
+        endTime: listing.endTime,
+        estimatedHours: listing.estimatedHours,
+        status: 'registered',
+        beforePhotoURL: null,
+        afterPhotoURL: null
+      })
+      await updateDoc(doc(db, 'listings', listing.id), {
+        signupCount: listing.signupCount + 1
+      })
+      showToast('You’re signed up! 🎉')
+    } catch (err) {
+      console.error(err)
+      showToast('Failed to sign up')
     }
-    setSignups((p) => [...p, su])
-    setListings((p) =>
-      p.map((l) => (l.id === listing.id ? { ...l, signupCount: l.signupCount + 1 } : l))
-    )
-    showToast('You’re signed up! 🎉')
   }
 
-  const cancelSignup = (signupId) => {
-    const su = signups.find((s) => s.id === signupId)
-    setSignups((p) => p.filter((s) => s.id !== signupId))
-    if (su) {
-      setListings((p) =>
-        p.map((l) =>
-          l.id === su.listingId ? { ...l, signupCount: Math.max(0, l.signupCount - 1) } : l
-        )
-      )
+  const cancelSignup = async (signupId) => {
+    try {
+      const signup = signups.find(s => s.id === signupId)
+      if (!signup) return
+      
+      const listing = listings.find(l => l.id === signup.listingId)
+      
+      // Delete signup document
+      await deleteDoc(doc(db, 'signups', signupId))
+      
+      // Decrement listing count
+      if (listing) {
+        await updateDoc(doc(db, 'listings', listing.id), {
+          signupCount: Math.max(0, listing.signupCount - 1)
+        })
+      }
+      
+      showToast('Signup cancelled')
+    } catch (err) {
+      console.error(err)
+      showToast('Failed to cancel signup')
+    }
+  }
+
+  const checkIn = async (signupId) => {
+    try {
+      await updateDoc(doc(db, 'signups', signupId), { 
+        checkedIn: true,
+        checkInTime: Date.now()
+      })
+      showToast('Checked in successfully!')
+    } catch (err) {
+      console.error(err)
+      showToast('Failed to check in')
     }
   }
 
   // --- Photo upload + completion ---
-  const setPhoto = (signupId, kind, dataUrl) => {
-    setSignups((p) =>
-      p.map((s) =>
-        s.id === signupId
-          ? { ...s, [kind === 'before' ? 'beforePhotoURL' : 'afterPhotoURL']: dataUrl }
-          : s
-      )
-    )
+  const setPhoto = async (signupId, kind, fileOrDataUrl) => {
+    try {
+      const field = kind === 'before' ? 'beforePhotoURL' : 'afterPhotoURL'
+      await updateDoc(doc(db, 'signups', signupId), {
+        [field]: fileOrDataUrl
+      })
+    } catch (err) {
+      console.error(err)
+      showToast('Failed to save photo')
+    }
   }
 
-  const submitForReview = (signupId) => {
-    setSignups((p) => p.map((s) => (s.id === signupId ? { ...s, status: 'pending' } : s)))
-    showToast('Submitted for admin review')
+  const submitForReview = async (signupId, actualHours) => {
+    try {
+      await updateDoc(doc(db, 'signups', signupId), { 
+        status: 'pending',
+        actualHours: actualHours
+      })
+      showToast('Submitted for admin review')
+    } catch (err) {
+      console.error('Submit for review failed:', err)
+      showToast('Failed to submit: ' + err.message)
+      throw err
+    }
   }
 
   // --- Admin: approve completion, award hours/points ---
-  const approveCompletion = (signupId) => {
+  const approveCompletion = async (signupId) => {
     const su = signups.find((s) => s.id === signupId)
     if (!su) return
-    const hours = su.estimatedHours
+    const hours = su.actualHours || su.estimatedHours
     const pts = Math.round(hours * 50)
-    setSignups((p) =>
-      p.map((s) =>
-        s.id === signupId
-          ? { ...s, status: 'completed', hoursAwarded: hours, pointsAwarded: pts }
-          : s
-      )
-    )
-    setUser((u) => ({
-      ...u,
-      points: (u.points || 0) + pts,
-      totalHours: +(((u.totalHours || 0) + hours).toFixed(1)),
-      cleanups: (u.cleanups || 0) + 1
-    }))
-    showToast(`Approved! +${hours}h, +${pts} pts`)
+    try {
+      await updateDoc(doc(db, 'signups', signupId), {
+        status: 'completed',
+        hoursAwarded: hours,
+        pointsAwarded: pts
+      })
+      const userRef = doc(db, 'users', su.uid)
+      const userSnap = await getDoc(userRef)
+      if (userSnap.exists()) {
+        const u = userSnap.data()
+        await updateDoc(userRef, {
+          points: (u.points || 0) + pts,
+          totalHours: +(((u.totalHours || 0) + hours).toFixed(1)),
+          cleanups: (u.cleanups || 0) + 1
+        })
+      }
+      showToast(`Approved! +${hours}h, +${pts} pts`)
+    } catch (err) {
+      showToast('Error approving')
+    }
   }
 
   // --- Admin: create a listing ---
-  const addListing = (data) => {
-    const listing = {
-      id: 'l' + Date.now(),
-      signupCount: 0,
-      status: 'open',
-      adminId: user.uid,
-      adminName: `${user.name} (Admin)`,
-      location: data.location || { lat: 33.92 + Math.random() * 0.06, lng: -84.36 + Math.random() * 0.06 },
-      ...data
+  const addListing = async (data) => {
+    try {
+      let photoUrl = data.photoURL || 'https://images.unsplash.com/photo-1618477461853-cf6ed80fbfc9?auto=format&fit=crop&q=80&w=800'
+      // If photoURL is a Data URL, upload it
+      if (photoUrl.startsWith('data:image')) {
+        showToast('Uploading listing photo...')
+        const fileRef = ref(storage, `listings/listing_${Date.now()}`)
+        await uploadString(fileRef, photoUrl, 'data_url')
+        photoUrl = await getDownloadURL(fileRef)
+      }
+      
+      await addDoc(collection(db, 'listings'), {
+        signupCount: 0,
+        status: 'open',
+        adminId: user.uid,
+        adminName: `${user.name} (Admin)`,
+        location: data.location || { lat: 33.92 + Math.random() * 0.06, lng: -84.36 + Math.random() * 0.06 },
+        ...data,
+        photoURL: photoUrl
+      })
+      showToast('Listing published')
+    } catch (err) {
+      console.error(err)
+      showToast('Error publishing listing')
     }
-    setListings((p) => [listing, ...p])
-    showToast('Listing published')
+  }
+
+  if (loading) {
+    return <div style={{ padding: 20, textAlign: 'center', paddingTop: 100 }}>Loading CleanUp Crew...</div>
   }
 
   return (
@@ -146,6 +287,7 @@ export function AppProvider({ children }) {
         signOut,
         signUpForEvent,
         cancelSignup,
+        checkIn,
         setPhoto,
         submitForReview,
         approveCompletion,
