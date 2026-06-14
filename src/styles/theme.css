@@ -353,8 +353,9 @@ select {
 
 /* ===== Map ===== */
 .map-wrap {
-  height: calc(100vh - 86px - 64px);
-  min-height: 340px;
+  height: 42vh;
+  min-height: 240px;
+  max-height: 380px;
   position: relative;
 }
 
