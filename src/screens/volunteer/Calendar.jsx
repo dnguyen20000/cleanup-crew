@@ -28,11 +28,12 @@ const DOW = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
 export default function Calendar() {
   const { signups, cancelSignup, checkIn, setPhoto, submitForReview, user } = useApp()
+  const mySignups = signups.filter((s) => s.uid === user?.uid)
   const [openId, setOpenId] = useState(null)
   const [celebrate, setCelebrate] = useState(null)
   const now = new Date()
   const week = buildWeek()
-  const datesWithEvents = new Set(signups.map((s) => s.eventDate))
+  const datesWithEvents = new Set(mySignups.map((s) => s.eventDate))
 
   const [nowMs, setNowMs] = useState(Date.now())
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function Calendar() {
           })}
         </div>
 
-        {signups.length === 0 && (
+        {mySignups.length === 0 && (
           <div className="empty">
             No events scheduled yet.
             <br />
@@ -69,7 +70,7 @@ export default function Calendar() {
           </div>
         )}
 
-        {signups.map((s) => {
+        {mySignups.map((s) => {
           const open = openId === s.id
           const canCheckIn = withinWindow(s, now)
           const done = s.status === 'completed'
