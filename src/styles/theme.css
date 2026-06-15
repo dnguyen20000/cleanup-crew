@@ -717,3 +717,68 @@ select {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* ===== Monthly Calendar ===== */
+.month-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.month-header span {
+  width: 40px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.week-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.week-row:active {
+  background: var(--surface-2);
+}
+
+.month-day {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 600;
+  position: relative;
+}
+
+.month-day.dim {
+  color: var(--text-faint);
+}
+
+.month-day.today {
+  background: var(--surface-3);
+}
+
+.month-day .marker {
+  position: absolute;
+  bottom: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+}
