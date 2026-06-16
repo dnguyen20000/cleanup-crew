@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { View, Text, ActivityIndicator } from 'react-native'
 import { auth, db, storage } from '../firebase.js'
 import { 
   onAuthStateChanged, 
@@ -38,8 +39,6 @@ export function AppProvider({ children }) {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // Set initial user state with a default role to prevent infinite redirects
-        // Also provide defaults for name and stats so the UI doesn't crash on .split() or [0]
         setUser({ 
           uid: firebaseUser.uid, 
           email: firebaseUser.email, 
@@ -246,13 +245,7 @@ export function AppProvider({ children }) {
   const addListing = async (data) => {
     try {
       let photoUrl = data.photoURL || 'https://images.unsplash.com/photo-1618477461853-cf6ed80fbfc9?auto=format&fit=crop&q=80&w=800'
-      // If photoURL is a Data URL, upload it
-      if (photoUrl.startsWith('data:image')) {
-        showToast('Uploading listing photo...')
-        const fileRef = ref(storage, `listings/listing_${Date.now()}`)
-        await uploadString(fileRef, photoUrl, 'data_url')
-        photoUrl = await getDownloadURL(fileRef)
-      }
+
       
       await addDoc(collection(db, 'listings'), {
         signupCount: 0,
@@ -271,7 +264,12 @@ export function AppProvider({ children }) {
   }
 
   if (loading) {
-    return <div style={{ padding: 20, textAlign: 'center', paddingTop: 100 }}>Loading Ripple...</div>
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#2fae7a" />
+        <Text style={{ marginTop: 20, color: '#9a9aa2' }}>Loading Ripple...</Text>
+      </View>
+    )
   }
 
   return (

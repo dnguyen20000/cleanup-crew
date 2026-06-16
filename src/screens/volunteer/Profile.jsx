@@ -100,7 +100,7 @@ export default function Profile() {
           <LogOut size={18} /> Log out
         </button>
         <p className="faint" style={{ textAlign: 'center', fontSize: 12, marginTop: 24 }}>
-          CleanUp Crew · Demo build v0.1
+          Ripple · Demo build v0.1
         </p>
       </div>
     </>

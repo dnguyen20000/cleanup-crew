@@ -15,7 +15,7 @@ export function downloadCertificate(user) {
   doc.setTextColor(47, 174, 122)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(34)
-  doc.text('CleanUp Crew', w / 2, 110, { align: 'center' })
+  doc.text('Ripple', w / 2, 110, { align: 'center' })
 
   doc.setTextColor(245, 245, 247)
   doc.setFontSize(22)
@@ -53,11 +53,11 @@ export function downloadCertificate(user) {
   doc.setTextColor(107, 107, 115)
   doc.text(`Rank achieved: ${user.rank || 'Volunteer'}`, w / 2, 360, { align: 'center' })
   doc.text(
-    `Issued ${new Date().toLocaleDateString()}  ·  CleanUp Crew Volunteer Program`,
+    `Issued ${new Date().toLocaleDateString()}  ·  Ripple Volunteer Program`,
     w / 2,
     h - 60,
     { align: 'center' }
   )
 
-  doc.save(`CleanUpCrew-Certificate-${(user.name || 'Volunteer').replace(/\s+/g, '')}.pdf`)
+  doc.save(`Ripple-Certificate-${(user.name || 'Volunteer').replace(/\s+/g, '')}.pdf`)
 }

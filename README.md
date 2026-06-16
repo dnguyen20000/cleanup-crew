@@ -1,4 +1,4 @@
-# 🌱 CleanUp Crew
+# 🌱 Ripple
 
 A mobile-friendly web app for a sustainable community litter-cleanup ecosystem.
 Volunteers find nearby cleanup hot spots, join admin-run events, log before/after

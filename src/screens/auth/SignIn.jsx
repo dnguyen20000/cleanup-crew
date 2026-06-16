@@ -50,7 +50,7 @@ export default function SignIn() {
       <div className="phone-body no-tabs">
         <div className="auth">
           <div className="logo">🌱</div>
-          <h1>CleanUp Crew</h1>
+          <h1>Ripple</h1>
           <p className="tag">Pick up litter. Earn rewards. Build community.</p>
 
           <div className="role-toggle">
