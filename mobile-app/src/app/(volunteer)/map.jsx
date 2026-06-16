@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Image, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import MapView, { Marker } from 'react-native-maps';
-import { ChevronLeft, MapPin, Calendar, Clock, Shield, Users, X, UserCheck } from 'lucide-react-native';
+import MapView, { Marker, Circle } from 'react-native-maps';
+import { ChevronLeft, MapPin, Calendar, Clock, Shield, Users, X, UserCheck, Flame } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import { useApp } from '../../context/AppContext';
 import { SEVERITY } from '../../data/mockData';
@@ -46,9 +46,29 @@ export default function MapScreen() {
           latitudeDelta: 0.1,
           longitudeDelta: 0.1,
         }}
-        userInterfaceStyle="dark"
+        userInterfaceStyle="light"
       >
-        {sorted.map((item) => {
+        {/* Heatmap Circles */}
+        {[...sorted].sort((a, b) => SEVERITY[b.severity].multiplier - SEVERITY[a.severity].multiplier).map((item) => {
+          const sev = SEVERITY[item.severity];
+          // Base radius on multiplier (3x = 1200m, 2x = 600m, 1x = 300m)
+          const radius = sev.multiplier === 3 ? 1200 : sev.multiplier === 2 ? 600 : 300;
+          // Use consistent transparency (66 hex / ~40%) for all heatmap circles so map is visible underneath
+          const opacityHex = '66';
+          return (
+            <Circle
+              key={`heat-${item.id}`}
+              center={{ latitude: item.location.lat, longitude: item.location.lng }}
+              radius={radius}
+              fillColor={`${sev.color}${opacityHex}`}
+              strokeColor={sev.color}
+              strokeWidth={3}
+            />
+          );
+        })}
+
+        {/* Interactive Markers */}
+        {[...sorted].sort((a, b) => SEVERITY[b.severity].multiplier - SEVERITY[a.severity].multiplier).map((item) => {
           const sev = SEVERITY[item.severity];
           return (
             <Marker
@@ -56,10 +76,11 @@ export default function MapScreen() {
               coordinate={{ latitude: item.location.lat, longitude: item.location.lng }}
               onPress={() => setSelected(item)}
             >
-              <View style={[styles.markerBody, selected?.id === item.id && styles.markerBodySelected, { backgroundColor: selected?.id === item.id ? COLORS.green : sev.color }]}>
-                <Text style={[styles.markerText, selected?.id === item.id && { color: '#06150f' }]}>{item.dist.toFixed(1)}m</Text>
+              <View style={styles.transparentMarkerArea}>
+                <Text style={[styles.markerText, { textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 }]}>
+                  {sev.multiplier > 1 ? `${sev.multiplier}x • ${item.dist.toFixed(1)}mi` : `${item.dist.toFixed(1)}mi`}
+                </Text>
               </View>
-              <View style={[styles.markerTriangle, { borderTopColor: selected?.id === item.id ? COLORS.green : sev.color }]} />
             </Marker>
           );
         })}
@@ -87,9 +108,17 @@ export default function MapScreen() {
                   </TouchableOpacity>
 
                 <View style={{ padding: 20 }}>
-                  <View style={[globalStyles.row, globalStyles.between, { marginBottom: 6 }]}>
-                    <View style={[globalStyles.pill, sev.pill === 'red' ? globalStyles.pillRed : sev.pill === 'orange' ? globalStyles.pillOrange : globalStyles.pillGreen]}>
-                      <Text style={[globalStyles.pillText, sev.pill === 'red' ? globalStyles.pillTextRed : sev.pill === 'orange' ? globalStyles.pillTextOrange : globalStyles.pillTextGreen]}>{sev.label} hot spot</Text>
+                  <View style={[globalStyles.row, globalStyles.between, { marginBottom: 6, flexWrap: 'wrap', gap: 6 }]}>
+                    <View style={[globalStyles.row, { gap: 6, flexWrap: 'wrap' }]}>
+                      <View style={[globalStyles.pill, sev.pill === 'red' ? globalStyles.pillRed : sev.pill === 'orange' ? globalStyles.pillOrange : globalStyles.pillGreen]}>
+                        <Text style={[globalStyles.pillText, sev.pill === 'red' ? globalStyles.pillTextRed : sev.pill === 'orange' ? globalStyles.pillTextOrange : globalStyles.pillTextGreen]}>{sev.label} hot spot</Text>
+                      </View>
+                      {sev.multiplier > 1 && (
+                        <View style={[globalStyles.pill, globalStyles.pillRed, { backgroundColor: '#ffedeb', borderColor: '#ef3b2d' }]}>
+                          <Flame size={12} color="#ef3b2d" />
+                          <Text style={[globalStyles.pillText, globalStyles.pillTextRed, { fontWeight: '800' }]}>{sev.multiplier}x Points Drop Zone!</Text>
+                        </View>
+                      )}
                     </View>
                     <View style={[globalStyles.pill, globalStyles.pillBlue]}>
                       <Text style={[globalStyles.pillText, globalStyles.pillTextBlue]}>
@@ -176,30 +205,16 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  markerBody: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.2)',
-  },
-  markerBodySelected: {
-    borderColor: COLORS.greenSoft,
+  transparentMarkerArea: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   markerText: {
     color: '#fff',
-    fontWeight: '800',
-    fontSize: 12,
-  },
-  markerTriangle: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 5,
-    borderRightWidth: 5,
-    borderTopWidth: 6,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    alignSelf: 'center',
+    fontWeight: '900',
+    fontSize: 14,
+    textAlign: 'center',
   },
   modalBackdrop: {
     flex: 1,

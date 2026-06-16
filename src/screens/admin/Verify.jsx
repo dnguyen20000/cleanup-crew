@@ -26,7 +26,12 @@ export default function Verify() {
         {pending.map((s) => (
           <div key={s.id} className="card">
             <div className="row between" style={{ marginBottom: 12 }}>
-              <strong>{s.title}</strong>
+              <div style={{ flex: 1, paddingRight: 8 }}>
+                <strong>{s.title}</strong>
+                <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>
+                  Volunteer: {s.userName || 'Volunteer'}
+                </div>
+              </div>
               <span className="pill orange">
                 <Clock size={12} /> Pending
               </span>
@@ -56,10 +61,10 @@ export default function Verify() {
             {done.map((s) => (
               <div key={s.id} className="card">
                 <div className="row between">
-                  <div>
+                  <div style={{ flex: 1, paddingRight: 8 }}>
                     <strong>{s.title}</strong>
                     <div className="muted" style={{ fontSize: 13, marginTop: 3 }}>
-                      {s.eventDate}
+                      {s.userName || 'Volunteer'} · {s.eventDate}
                     </div>
                   </div>
                   <span className="pill green">

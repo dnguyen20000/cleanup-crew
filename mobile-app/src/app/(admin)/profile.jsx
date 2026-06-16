@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LogOut, ShieldCheck, Mail } from 'lucide-react-native';
+import { LogOut, ShieldCheck, Mail, Building } from 'lucide-react-native';
 import Header from '../../components/Header';
 import { useApp } from '../../context/AppContext';
 import { COLORS, globalStyles } from '../../theme';
@@ -37,6 +37,16 @@ export default function AdminProfile() {
 
         <View style={globalStyles.card}>
           <View style={[styles.listRow, { paddingTop: 0 }]}>
+            <View style={globalStyles.row}>
+              <Building size={18} color={COLORS.textDim} />
+              <Text style={globalStyles.mutedText}>Organization</Text>
+            </View>
+            <Text style={globalStyles.boldText}>{user.organization || 'Not provided'}</Text>
+          </View>
+          
+          <View style={styles.divider} />
+
+          <View style={styles.listRow}>
             <View style={globalStyles.row}>
               <Mail size={18} color={COLORS.textDim} />
               <Text style={globalStyles.mutedText}>Email</Text>

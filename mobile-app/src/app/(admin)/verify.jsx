@@ -4,9 +4,10 @@ import Header from '../../components/Header';
 import { useApp } from '../../context/AppContext';
 import { CheckCircle2, Clock } from 'lucide-react-native';
 import { COLORS, SIZES, globalStyles } from '../../theme';
+import { SEVERITY } from '../../data/mockData';
 
 export default function AdminVerify() {
-  const { signups, approveCompletion } = useApp();
+  const { signups, listings, approveCompletion } = useApp();
   const pending = signups.filter((s) => s.status === 'pending');
   const done = signups.filter((s) => s.status === 'completed');
 
@@ -29,7 +30,12 @@ export default function AdminVerify() {
         {pending.map((s) => (
           <View key={s.id} style={globalStyles.card}>
             <View style={[globalStyles.row, globalStyles.between, { marginBottom: 12 }]}>
-              <Text style={globalStyles.boldText}>{s.title}</Text>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={globalStyles.boldText}>{s.title}</Text>
+                <Text style={[globalStyles.mutedText, { fontSize: 13, marginTop: 2 }]}>
+                  Volunteer: {s.userName || 'Volunteer'}
+                </Text>
+              </View>
               <View style={[globalStyles.pill, globalStyles.pillOrange]}>
                 <Clock size={12} color="#f3a45f" />
                 <Text style={[globalStyles.pillText, globalStyles.pillTextOrange]}>Pending</Text>
@@ -52,14 +58,20 @@ export default function AdminVerify() {
             </View>
 
             <Text style={[globalStyles.mutedText, { fontSize: 13, marginVertical: 12 }]}>
-              Will award {s.actualHours || s.estimatedHours}h + {Math.round((s.actualHours || s.estimatedHours) * 50)} pts on approval
+              {(() => {
+                const listing = listings.find((l) => l.id === s.listingId);
+                const multiplier = (listing && SEVERITY[listing.severity]?.multiplier) || 1;
+                const hours = s.actualHours || s.estimatedHours;
+                const pts = Math.round(hours * 50 * multiplier);
+                return `Will award ${hours}h + ${pts} pts ${multiplier > 1 ? `(${multiplier}x Drop Zone) ` : ''}on approval`;
+              })()}
             </Text>
 
             <TouchableOpacity 
               style={[globalStyles.btn, globalStyles.btnPrimary]}
               onPress={() => approveCompletion(s.id)}
             >
-              <CheckCircle2 size={18} color="#06150f" />
+              <CheckCircle2 size={18} color="#FFFFFF" />
               <Text style={[globalStyles.btnText, globalStyles.btnPrimaryText]}>Approve & award hours</Text>
             </TouchableOpacity>
           </View>
@@ -71,10 +83,10 @@ export default function AdminVerify() {
             {done.map((s) => (
               <View key={s.id} style={globalStyles.card}>
                 <View style={[globalStyles.row, globalStyles.between]}>
-                  <View>
+                  <View style={{ flex: 1, paddingRight: 8 }}>
                     <Text style={globalStyles.boldText}>{s.title}</Text>
                     <Text style={[globalStyles.mutedText, { fontSize: 13, marginTop: 3 }]}>
-                      {s.eventDate}
+                      {s.userName || 'Volunteer'} · {s.eventDate}
                     </Text>
                   </View>
                   <View style={[globalStyles.pill, globalStyles.pillGreen]}>

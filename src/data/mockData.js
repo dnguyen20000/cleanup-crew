@@ -127,11 +127,12 @@ export const MOCK_LEADERBOARD = [
   { name: 'Peachtree Pickers', points: 4820, members: 12 },
   { name: 'River Keepers', points: 4310, members: 9 },
   { name: 'Buckhead Brigade', points: 3990, members: 15 },
-  { name: 'Dunwoody Defenders', points: 2750, members: 7 }
+  { name: 'Dunwoody Defenders', points: 2750, members: 7 },
+  { name: 'Midtown Sweepers', points: 2100, members: 8 }
 ]
 
 export const SEVERITY = {
-  high: { color: '#ef3b2d', label: 'Very busy', pill: 'red' },
-  medium: { color: '#f0762b', label: 'Busy', pill: 'orange' },
-  low: { color: '#2fae7a', label: 'Light', pill: 'green' }
+  high: { color: '#ef3b2d', label: 'High', pill: 'red' },
+  medium: { color: '#f0762b', label: 'Medium', pill: 'orange' },
+  low: { color: '#2fae7a', label: 'Low', pill: 'green' }
 }

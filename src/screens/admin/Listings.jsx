@@ -78,9 +78,9 @@ export default function Listings() {
               <div className="field" style={{ flex: 1 }}>
                 <label>Severity</label>
                 <select value={form.severity} onChange={(e) => set('severity', e.target.value)}>
-                  <option value="low">Light</option>
-                  <option value="medium">Busy</option>
-                  <option value="high">Very busy</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
                 </select>
               </div>
               <div className="field" style={{ flex: 1 }}>

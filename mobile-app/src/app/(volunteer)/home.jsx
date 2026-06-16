@@ -61,17 +61,6 @@ export default function Home() {
             </View>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNum}>{user.cleanups}</Text>
-            <View style={globalStyles.row}>
-              <Leaf size={12} color={COLORS.textDim} />
-              <Text style={styles.statLbl}>Cleanups joined</Text>
-            </View>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNum}>{user.lbsCollected}</Text>
-            <Text style={styles.statLbl}>♻️ lbs of litter</Text>
-          </View>
-          <View style={styles.statBox}>
             <Text style={styles.statNum}>{rank.emoji}</Text>
             <View style={globalStyles.row}>
               <Award size={12} color={COLORS.textDim} />

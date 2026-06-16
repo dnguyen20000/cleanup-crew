@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MapPin } from 'lucide-react-native';
 import { useApp } from '../../context/AppContext';
@@ -12,6 +12,7 @@ export default function SignIn() {
   const [isSignup, setIsSignup] = useState(true);
   const [name, setName] = useState('');
   const [hometown, setHometown] = useState('');
+  const [organization, setOrganization] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,7 @@ export default function SignIn() {
       {
         name: name || (tab === 'admin' ? 'Admin User' : 'Volunteer'),
         hometown,
+        organization,
         email,
         password,
         isSignup
@@ -42,8 +44,8 @@ export default function SignIn() {
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.auth}>
-          <Text style={styles.logo}>🌱</Text>
-          <Text style={styles.h1}>Ripple</Text>
+          <Image source={require('../../../assets/images/icon.png')} style={{ width: 140, height: 140, alignSelf: 'center', borderRadius: 28, marginBottom: 8 }} resizeMode="contain" />
+          {/* <Text style={styles.h1}>Ripple</Text> */}
           <Text style={styles.tag}>Pick up litter. Earn rewards. Build community.</Text>
 
           <View style={styles.roleToggle}>
@@ -92,6 +94,18 @@ export default function SignIn() {
                     value={hometown} 
                     onChangeText={setHometown} 
                     placeholder="City, State" 
+                    placeholderTextColor={COLORS.textDim}
+                  />
+                </View>
+              )}
+              {tab === 'admin' && (
+                <View style={styles.field}>
+                  <Text style={styles.label}>Organization</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={organization} 
+                    onChangeText={setOrganization} 
+                    placeholder="e.g. City of Atlanta" 
                     placeholderTextColor={COLORS.textDim}
                   />
                 </View>
@@ -181,7 +195,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   roleBtnActive: {
-    backgroundColor: COLORS.text,
+    backgroundColor: COLORS.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   roleBtnText: {
     fontWeight: '700',
@@ -189,7 +208,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   roleBtnTextActive: {
-    color: '#000',
+    color: COLORS.text,
   },
   radio: {
     width: 16,

@@ -18,6 +18,7 @@ import {
   deleteDoc
 } from 'firebase/firestore'
 import { ref, uploadString, getDownloadURL } from 'firebase/storage'
+import { SEVERITY } from '../data/mockData.js'
 
 const AppContext = createContext(null)
 export const useApp = () => useContext(AppContext)
@@ -103,6 +104,7 @@ export function AppProvider({ children }) {
           totalHours: 0,
           cleanups: 0,
           hometown: profile.hometown || 'Local Community',
+          organization: profile.organization || '',
           team: 'Earth Defenders'
         })
       } else {
@@ -130,6 +132,7 @@ export function AppProvider({ children }) {
       await addDoc(collection(db, 'signups'), {
         listingId: listing.id,
         uid: user.uid,
+        userName: user.name,
         title: listing.title,
         eventDate: listing.eventDate,
         startTime: listing.startTime,
@@ -218,7 +221,9 @@ export function AppProvider({ children }) {
     const su = signups.find((s) => s.id === signupId)
     if (!su) return
     const hours = su.actualHours || su.estimatedHours
-    const pts = Math.round(hours * 50)
+    const listing = listings.find((l) => l.id === su.listingId)
+    const multiplier = (listing && SEVERITY[listing.severity]?.multiplier) || 1
+    const pts = Math.round(hours * 50 * multiplier)
     try {
       await updateDoc(doc(db, 'signups', signupId), {
         status: 'completed',

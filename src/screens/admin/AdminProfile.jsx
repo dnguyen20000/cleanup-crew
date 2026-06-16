@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { LogOut, ShieldCheck, Mail } from 'lucide-react'
+import { LogOut, ShieldCheck, Mail, Building } from 'lucide-react'
 import Header from '../../components/Header.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 
@@ -29,6 +29,13 @@ export default function AdminProfile() {
 
         <div className="card">
           <div className="list-row" style={{ paddingTop: 0 }}>
+            <div className="row">
+              <Building size={18} className="muted" />
+              <span className="muted">Organization</span>
+            </div>
+            <strong>{user.organization || 'Not provided'}</strong>
+          </div>
+          <div className="list-row">
             <div className="row">
               <Mail size={18} className="muted" />
               <span className="muted">Email</span>

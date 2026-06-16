@@ -139,7 +139,7 @@ export default function Calendar() {
                     ]}>
                       {dayObj.day}
                     </Text>
-                    {hasEvent && <View style={[styles.eventDot, isToday && { backgroundColor: '#06150f' }]} />}
+                    {hasEvent && <View style={[styles.eventDot, isToday && { backgroundColor: '#FFFFFF' }]} />}
                   </View>
                 );
               })}
@@ -153,6 +153,59 @@ export default function Calendar() {
             <Text style={styles.guideText}>Tap a week to view events</Text>
           </View>
         )}
+
+        <View style={{ marginTop: 24, paddingBottom: 40 }}>
+          <Text style={[globalStyles.sectionTitle, { marginBottom: 16 }]}>Your scheduled cleanups</Text>
+          {mySignups.length === 0 ? (
+            <View style={globalStyles.card}>
+              <Text style={globalStyles.mutedText}>No events scheduled yet. Head to the Map to sign up for a cleanup.</Text>
+            </View>
+          ) : (
+            mySignups.map((signup) => {
+              const listing = listings.find(l => l.id === signup.listingId);
+              if (!listing) return null;
+              
+              return (
+                <View key={signup.id} style={globalStyles.card}>
+                  <Text style={[globalStyles.sectionTitle, { marginTop: 0 }]}>{listing.title}</Text>
+                  <View style={globalStyles.row}>
+                    <Clock size={16} color={COLORS.textDim} />
+                    <Text style={globalStyles.mutedText}>{listing.eventDate} · {listing.startTime} - {listing.endTime}</Text>
+                  </View>
+                  <View style={[globalStyles.row, { marginTop: 6 }]}>
+                    <MapPin size={16} color={COLORS.textDim} />
+                    <Text style={globalStyles.mutedText}>Atlanta, GA</Text>
+                  </View>
+
+                  <View style={{ marginTop: 16 }}>
+                    {signup.status === 'registered' ? (
+                      <View style={{ gap: 12 }}>
+                        <View style={[globalStyles.pill, globalStyles.pillBlue, { alignSelf: 'flex-start' }]}>
+                          <Text style={[globalStyles.pillText, globalStyles.pillTextBlue]}>Registered</Text>
+                        </View>
+                        {!signup.checkedIn ? (
+                          <TouchableOpacity style={[globalStyles.btn, globalStyles.btnOutline]} onPress={() => checkIn(signup.id)}>
+                            <Text style={globalStyles.btnText}>Check In</Text>
+                          </TouchableOpacity>
+                        ) : (
+                          <Text style={[globalStyles.boldText, { color: COLORS.green }]}>You are checked in!</Text>
+                        )}
+                      </View>
+                    ) : signup.status === 'pending' ? (
+                      <View style={[globalStyles.pill, globalStyles.pillOrange, { alignSelf: 'flex-start' }]}>
+                        <Text style={[globalStyles.pillText, globalStyles.pillTextOrange]}>In review</Text>
+                      </View>
+                    ) : (
+                      <View style={[globalStyles.pill, globalStyles.pillGreen, { alignSelf: 'flex-start' }]}>
+                        <Text style={[globalStyles.pillText, globalStyles.pillTextGreen]}>Completed</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              );
+            })
+          )}
+        </View>
       </ScrollView>
 
       {/* Week Modal */}
@@ -183,7 +236,7 @@ export default function Calendar() {
                     {dayObj.day}
                   </Text>
                   {hasEvent && (
-                    <View style={[styles.eventDot, isSelected && { backgroundColor: '#06150f' }, { bottom: 4 }]} />
+                    <View style={[styles.eventDot, isSelected && { backgroundColor: '#FFFFFF' }, { bottom: 4 }]} />
                   )}
                 </TouchableOpacity>
               );
@@ -337,7 +390,7 @@ const styles = StyleSheet.create({
     color: COLORS.textFaint,
   },
   todayText: {
-    color: '#06150f',
+    color: '#FFFFFF',
   },
   eventDot: {
     width: 6,
@@ -401,7 +454,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   stripDayTextSelected: {
-    color: '#06150f',
+    color: '#FFFFFF',
   },
   emptyState: {
     padding: 30,

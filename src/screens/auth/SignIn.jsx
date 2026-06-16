@@ -10,6 +10,7 @@ export default function SignIn() {
   const [isSignup, setIsSignup] = useState(true)
   const [name, setName] = useState('')
   const [hometown, setHometown] = useState('')
+  const [organization, setOrganization] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [gps, setGps] = useState(false)
@@ -33,6 +34,7 @@ export default function SignIn() {
       {
         name: name || (tab === 'admin' ? 'Admin User' : 'Volunteer'),
         hometown,
+        organization,
         email,
         password,
         isSignup
@@ -49,8 +51,8 @@ export default function SignIn() {
     <div className="phone">
       <div className="phone-body no-tabs">
         <div className="auth">
-          <div className="logo">🌱</div>
-          <h1>Ripple</h1>
+          <img src="/icon.png" alt="Ripple Logo" style={{ width: 140, height: 140, display: 'block', margin: '0 auto 8px', borderRadius: 28 }} />
+          {/* <h1>Ripple</h1> */}
           <p className="tag">Pick up litter. Earn rewards. Build community.</p>
 
           <div className="role-toggle">
@@ -84,6 +86,16 @@ export default function SignIn() {
                     value={hometown}
                     onChange={(e) => setHometown(e.target.value)}
                     placeholder="City, State"
+                  />
+                </div>
+              )}
+              {tab === 'admin' && (
+                <div className="field">
+                  <label>Organization</label>
+                  <input
+                    value={organization}
+                    onChange={(e) => setOrganization(e.target.value)}
+                    placeholder="e.g. City of Atlanta"
                   />
                 </div>
               )}

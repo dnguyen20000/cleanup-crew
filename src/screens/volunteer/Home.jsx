@@ -55,16 +55,6 @@ export default function Home() {
             </div>
           </div>
           <div className="stat">
-            <div className="num">{user.cleanups}</div>
-            <div className="lbl">
-              <Leaf size={12} style={{ verticalAlign: -1 }} /> Cleanups joined
-            </div>
-          </div>
-          <div className="stat">
-            <div className="num">{user.lbsCollected}</div>
-            <div className="lbl">♻️ lbs of litter</div>
-          </div>
-          <div className="stat">
             <div className="num">{rank.emoji}</div>
             <div className="lbl">
               <Award size={12} style={{ verticalAlign: -1 }} /> {rank.name}

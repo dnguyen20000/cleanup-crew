@@ -73,21 +73,12 @@ export default function Profile() {
             </View>
             <Text style={[globalStyles.boldText, { fontSize: 13 }]}>{user.email}</Text>
           </View>
-          <View style={styles.listRow}>
+          <View style={[styles.listRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
             <View style={globalStyles.row}>
               <Users size={18} color={COLORS.textDim} />
               <Text style={globalStyles.mutedText}>Team</Text>
             </View>
             <Text style={globalStyles.boldText}>{user.team || 'None'}</Text>
-          </View>
-          <View style={[styles.listRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-            <View style={globalStyles.row}>
-              <ShieldCheck size={18} color={COLORS.textDim} />
-              <Text style={globalStyles.mutedText}>Location services</Text>
-            </View>
-            <View style={[globalStyles.pill, globalStyles.pillGreen]}>
-              <Text style={[globalStyles.pillText, globalStyles.pillTextGreen]}>On</Text>
-            </View>
           </View>
         </View>
 
@@ -113,7 +104,7 @@ export default function Profile() {
             Download a verified PDF of your {user.totalHours} hours — great for school, scholarships, or service requirements.
           </Text>
           <TouchableOpacity style={[globalStyles.btn, globalStyles.btnPrimary]} onPress={handleDownload}>
-            <Download size={18} color="#06150f" />
+            <Download size={18} color="#FFFFFF" />
             <Text style={[globalStyles.btnText, globalStyles.btnPrimaryText]}>Download certificate</Text>
           </TouchableOpacity>
         </View>
@@ -122,10 +113,6 @@ export default function Profile() {
           <LogOut size={18} color={COLORS.text} />
           <Text style={globalStyles.btnText}>Log out</Text>
         </TouchableOpacity>
-
-        <Text style={[globalStyles.faintText, { textAlign: 'center', fontSize: 12, marginTop: 24 }]}>
-          Ripple · Expo App Demo
-        </Text>
 
       </ScrollView>
     </View>
@@ -186,11 +173,11 @@ const styles = StyleSheet.create({
     color: COLORS.textDim,
   },
   hero: {
-    backgroundColor: '#1b1b24', // deep blueish tint
+    backgroundColor: COLORS.surface2,
     padding: 20,
     borderRadius: SIZES.radius,
     borderWidth: 1,
-    borderColor: '#292936',
+    borderColor: COLORS.border,
     marginBottom: 14,
   },
   heroTitle: {

@@ -251,13 +251,18 @@ export default function Calendar() {
           ))}
         </div>
 
-        {mySignups.length === 0 && (
-          <div className="empty" style={{ marginTop: 24 }}>
-            No events scheduled yet.
-            <br />
-            Head to the Map to sign up for a cleanup.
-          </div>
-        )}
+        <div style={{ marginTop: 24, paddingBottom: 40 }}>
+          <h2 style={{ fontSize: 18, margin: '0 0 16px', fontWeight: 700 }}>Your scheduled cleanups</h2>
+          {mySignups.length === 0 ? (
+            <div className="empty">
+              No events scheduled yet.
+              <br />
+              Head to the Map to sign up for a cleanup.
+            </div>
+          ) : (
+            mySignups.map(s => renderCard(s))
+          )}
+        </div>
 
         {/* Weekly / Daily View Modal */}
         {activeWeekStart && (

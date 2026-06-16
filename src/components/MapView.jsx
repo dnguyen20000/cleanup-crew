@@ -9,7 +9,7 @@ export default function MapView({ listings, center, onSelect }) {
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; OpenStreetMap &copy; CARTO'
       />
-      {listings.map((l) => {
+      {[...listings].sort((a, b) => SEVERITY[b.severity].multiplier - SEVERITY[a.severity].multiplier).map((l) => {
         const sev = SEVERITY[l.severity]
         const radius = l.severity === 'high' ? 26 : l.severity === 'medium' ? 20 : 15
         return (

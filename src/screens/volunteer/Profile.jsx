@@ -49,19 +49,12 @@ export default function Profile() {
             </div>
             <strong style={{ fontSize: 13 }}>{user.email}</strong>
           </div>
-          <div className="list-row">
+          <div className="list-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
             <div className="row">
               <Users size={18} className="muted" />
               <span className="muted">Team</span>
             </div>
             <strong>{user.team}</strong>
-          </div>
-          <div className="list-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-            <div className="row">
-              <ShieldCheck size={18} className="muted" />
-              <span className="muted">Location services</span>
-            </div>
-            <span className="pill green">On</span>
           </div>
         </div>
 
@@ -99,9 +92,6 @@ export default function Profile() {
         >
           <LogOut size={18} /> Log out
         </button>
-        <p className="faint" style={{ textAlign: 'center', fontSize: 12, marginTop: 24 }}>
-          Ripple · Demo build v0.1
-        </p>
       </div>
     </>
   )

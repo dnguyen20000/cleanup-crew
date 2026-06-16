@@ -104,6 +104,7 @@ export function AppProvider({ children }) {
           totalHours: 0,
           cleanups: 0,
           hometown: profile.hometown || 'Local Community',
+          organization: profile.organization || '',
           team: 'Earth Defenders'
         })
       } else {
@@ -131,6 +132,7 @@ export function AppProvider({ children }) {
       await addDoc(collection(db, 'signups'), {
         listingId: listing.id,
         uid: user.uid,
+        userName: user.name,
         title: listing.title,
         eventDate: listing.eventDate,
         startTime: listing.startTime,
